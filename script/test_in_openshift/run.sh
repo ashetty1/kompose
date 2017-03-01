@@ -56,10 +56,18 @@ fi
 # Wait
 sleep 60;
 
+retry_up=0
 while [ "$(oc get pods | grep etherpad | grep -v deploy | awk '{ print $3 }')" != 'Running'  ] ||
 	  [ "$(oc get pods | grep mariadb | grep -v deploy | awk '{ print $3 }')" != 'Running'  ] ;do
-    echo "Waiting for the pods to come up ..."
-    sleep 30;
+
+    if [ $retry_up -lt 10 ]; then
+	echo "Waiting for the pods to come up ..."
+	retry_up=$(($retry_up + 1))
+	sleep 30;
+    else
+	echo "FAIL: kompose up has failed to bring the pods up"
+	exit 1;
+    fi
 done
 
 # Wait
@@ -84,8 +92,16 @@ fi
 
 sleep 60;
 
+retry_down=0
 while [ $(oc get pods | wc -l ) != 0 ] ; do
-    sleep 30;
+    if [ $retry_down -lt 10 ]; then
+	echo "Waiting for the pods to go down ..."
+	retry_down=$(($retry_down + 1))
+	sleep 30;
+    else
+	echo "FAIL: kompose down has failed to bring the pods up"
+	exit 1;
+    fi
 done
 
 if [ $(oc get pods | wc -l ) == 0 ] ; then
