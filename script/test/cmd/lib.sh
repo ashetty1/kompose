@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x;
+
 # Copyright 2016 The Kubernetes Authors All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +25,7 @@ function convert::init() {
     SUCCESS_MSGS=""
     FAIL_MSGS=""
 }
+
 readonly -f convert::init
 
 # remove all the temporary files created for test
