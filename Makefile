@@ -89,7 +89,7 @@ check-vendor:
 
 # Run all tests
 .PHONY: test
-test: check-vendor validate test-unit-cover install test-cmd test-openshift
+test: check-vendor validate test-unit-cover install test-cmd
 
 # build docker image that is used for running all test localy
 .PHONY: test-image
