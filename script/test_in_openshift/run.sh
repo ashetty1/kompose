@@ -28,7 +28,7 @@ install_oc_client
 convert::oc_cluster_up
 
 for test_case in tests/*; do
-    ./$test_case
+    echo $test_case
 done
 
 convert::oc_cluster_down
