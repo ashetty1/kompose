@@ -20,25 +20,15 @@ KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/kompose/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
-# # Install oc client
-# function install_oc_client () {
 
-sudo apt-get install wget -y
-sudo sed -i 's:DOCKER_OPTS=":DOCKER_OPTS="--insecure-registry 172.30.0.0/16 :g' /etc/default/docker
-sudo mv /bin/findmnt /bin/findmnt.backup
-sudo cat /etc/default/docker
-sudo /etc/init.d/docker restart;
-wget https://github.com/openshift/origin/releases/download/v1.4.1/openshift-origin-client-tools-v1.4.1-3f9807a-linux-64bit.tar.gz -O /tmp/oc.tar.gz
-mkdir /tmp/ocdir && cd /tmp/ocdir && tar -xvvf /tmp/oc.tar.gz
-sudo mv /tmp/ocdir/*/oc /usr/bin/
+convert::start_test "Functional tests on OpenShift"
+convert::oc_cluster_up
 
+for i in tests/*; do
+    ./$i
+done
 
-
-# # Run oc cluster up
-# oc cluster up; result=$?;
-
-convert::start_test "Openshift test"
-convert::run_cmd "oc cluster up"
+convert::oc_cluster_down
 
 # if [ $result -ne 0 ]; then
 #     echo "oc cluster up failed"
