@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x;
+
 # Copyright 2017 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +30,7 @@ export $(cat ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/envs)
 convert::run_cmd "kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/kompose/script/test/fixtures/etherpad/docker-compose.yml up"
 
 # Wait
-sleep 60;
+sleep 120;
 
 retry_up=0
 while [ "$(oc get pods | grep etherpad | grep -v deploy | awk '{ print $3 }')" != 'Running'  ] ||
