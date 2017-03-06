@@ -27,8 +27,8 @@ convert::start_test "Functional tests on OpenShift"
 install_oc_client
 convert::oc_cluster_up
 
-for test_case in tests/*; do
-    echo $test_case
+for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
+    ./$test_case
 done
 
 convert::oc_cluster_down
