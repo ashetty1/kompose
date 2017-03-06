@@ -27,7 +27,7 @@ source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 export $(cat ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/envs)
 
 # Run kompose up
-convert::run_cmd "kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/kompose/script/test/fixtures/etherpad/docker-compose.yml up"
+convert::run_cmd "kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/docker-compose.yml up"
 
 # Wait
 sleep 120;
@@ -59,7 +59,7 @@ fi
 # Run Kompose down
 echo "Running kompose down"
 
-convert:run_cmd "kompose --provider=openshift --emptyvols -f $KOMPOSE_ROOT/kompose/script/test/fixtures/etherpad/docker-compose.yml down"
+convert:run_cmd "kompose --provider=openshift --emptyvols -f $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml down"
 
 # if [ $result -ne 0 ]; then
 #     echo "Kompose down command failed"
