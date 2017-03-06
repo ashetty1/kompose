@@ -17,10 +17,12 @@
 # Test case for kompose up/down with etherpad
 
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
-#source $KOMPOSE_ROOT/script/test/cmd/globals.sh
+source $KOMPOSE_ROOT/kompose/script/test/cmd/lib.sh
+source $KOMPOSE_ROOT/script/test_in_openshift/lib.s
+
 
 # Env variables for etherpad
-export $(cat ${KOMPOSE_ROOT}/kompose/script/test/fixtures/etherpad/envs)
+export $(cat ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/envs)
 
 # Run kompose up
 convert::run_cmd "kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/kompose/script/test/fixtures/etherpad/docker-compose.yml up"
