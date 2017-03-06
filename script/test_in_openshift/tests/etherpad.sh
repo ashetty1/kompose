@@ -17,7 +17,7 @@
 # Test case for kompose up/down with etherpad
 
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
-source $KOMPOSE_ROOT/kompose/script/test/cmd/lib.sh
+source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
 
