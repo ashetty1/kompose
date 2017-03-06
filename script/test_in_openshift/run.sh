@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x;
+
 # Copyright 2017 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,8 +26,8 @@ source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 convert::start_test "Functional tests on OpenShift"
 convert::oc_cluster_up
 
-for i in tests/*; do
-    ./$i
+for test_case in tests/*; do
+    bash $t
 done
 
 convert::oc_cluster_down
