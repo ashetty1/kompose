@@ -1,7 +1,6 @@
 #!/bin/bash
 
 function install_oc_client () {
-    sudo apt-get install wget -y
     sudo sed -i 's:DOCKER_OPTS=":DOCKER_OPTS="--insecure-registry 172.30.0.0/16 :g' /etc/default/docker
     sudo mv /bin/findmnt /bin/findmnt.backup
     sudo cat /etc/default/docker

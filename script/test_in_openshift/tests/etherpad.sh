@@ -28,7 +28,6 @@ export $(cat ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/envs)
 kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/docker-compose.yml up
 
 
-
 # Wait
 sleep 120;
 
@@ -60,11 +59,12 @@ fi
 echo "Running kompose down"
 
 convert::run_cmd "kompose --provider=openshift --emptyvols -f $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml down"
+result=$?
 
-# if [ $result -ne 0 ]; then
-#     echo "Kompose down command failed"
-#     exit 1;
-# fi
+if [ $result -ne 0 ]; then
+    echo "Kompose down command failed"
+    exit 1;
+fi
 
 sleep 60;
 
