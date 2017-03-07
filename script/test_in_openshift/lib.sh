@@ -20,7 +20,7 @@ function convert::oc_cluster_up () {
 
     if [ $exit_status -ne 0 ]; then
 	FAIL_MSGS=$FAIL_MSGS"exit status: $exit_status\n";
-	return $exit_status;
+	exit $exit_status;
     fi
 
     oc login -u system:admin
@@ -33,36 +33,35 @@ function convert::oc_cluster_down () {
 
     if [ $exit_status -ne 0 ]; then
 	FAIL_MSGS=$FAIL_MSGS"exit status: $exit_status\n";
-	return $exit_status;
+	exit $exit_status;
     fi
 
 }
 
-# function retry () {
-#     local retry=0
-#     local retry_count=10
-#     if [ $retry -lt $retry_count ]; then
-# 	echo
-# 	sleep 10;
-# }
+function convert::kompose_up () {
+    dc_file=$1
+    kompose_cli='kompose --emptyvols --provider=openshift -f ${dc_file} up'
+    convert::run_cmd $kompose_cli
+    exit_status=$?
 
-# function convert::check_pods_up () {
-#     local arg_count=$#
-#     pod_1=$1
-#     pod
-#     if [ $arg_count > 2 ] || [ $arg_count < 2 ]; then
-# 	exit 1;
-#     fi
-    
-#     while [ "$(oc get pods | grep ${pod} | grep -v deploy | awk '{ print $3 }')"
-# 	    != 'Running' ]; do
-# 	if [ $retry_up -lt 10 ]; then
-# 	   echo "Waiting for the pods to come up ..."
-# 	   retry_up=$(($retry_up + 1))
-# 	   sleep 30
-# 	else
-# 	   convert::print_fail "FAIL: kompose up has failed to bring the pods up"
-# 	   exit 1
-# 	fi
-#     done
-# }
+    if [ $exit_status -ne 0 ]; then
+	FAIL_MSGS=$FAIL_MSGS"kompose up failed with exit status: $exit_status\n";
+	exit $exit_status;
+    fi
+}
+
+function convert::kompose_down () {
+    dc_file=$1
+    kompose_cli='kompose --emptyvols --provider=openshift -f ${dc_file} down'
+    convert::run_cmd $kompose_cli
+    exit_status=$?
+
+    if [ $exit_status -ne 0 ]; then
+	FAIL_MSGS=$FAIL_MSGS"kompose down failed with exit status: $exit_status\n";
+	exit $exit_status;
+    fi
+}
+
+function convert::oc_cleanup () {
+    oc delete bc,rc,rs,svc,is,dc,deploy,images,ds,builds --all
+}

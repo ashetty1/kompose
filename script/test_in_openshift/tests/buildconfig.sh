@@ -20,21 +20,15 @@ KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
-
-# Env variables for etherpad
-export $(cat ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/envs)
-
 # Run kompose up
-kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/docker-compose.yml up
-
-
+convert::kompose_up ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml
 
 # Wait
-sleep 120;
+sleep 60;
 
 retry_up=0
-while [ "$(oc get pods | grep etherpad | grep -v deploy | awk '{ print $3 }')" != 'Running'  ] ||
-	  [ "$(oc get pods | grep mariadb | grep -v deploy | awk '{ print $3 }')" != 'Running'  ] ;do
+while [ "$(oc get pods | grep foo | grep -v deploy | grep -v build | awk '{ print $3 }')" != 'Running'  ] ||
+	  [ "$(oc get pods | grep build | grep -v deploy | awk '{ print $3 }')" != 'Completed'  ] ;do
 
     if [ $retry_up -lt 10 ]; then
 	echo "Waiting for the pods to come up ..."
@@ -50,8 +44,8 @@ done
 sleep 5;
 
 # Check if all the pods are up
-if [ "$(oc get pods | grep etherpad | grep -v deploy | awk '{ print $3 }')" == 'Running'  ] &&
-       [ "$(oc get pods | grep mariadb | grep -v deploy | awk '{ print $3 }')" == 'Running'  ] ; then
+if [ "$(oc get pods | grep foo | grep -v deploy | grep -v build | awk '{ print $3 }')" == 'Running'  ] &&
+       [ "$(oc get pods | grep build | grep -v deploy | awk '{ print $3 }')" == 'Completed'  ] ; then
     convert::print_pass "All pods are Running now. kompose up is successful."
     oc get pods;
 fi
@@ -59,12 +53,7 @@ fi
 # Run Kompose down
 echo "Running kompose down"
 
-convert::run_cmd "kompose --provider=openshift --emptyvols -f $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml down"
-
-# if [ $result -ne 0 ]; then
-#     echo "Kompose down command failed"
-#     exit 1;
-# fi
+convert::kompose_down $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml
 
 sleep 60;
 
@@ -84,3 +73,4 @@ if [ $(oc get pods | wc -l ) == 0 ] ; then
     convert::print_pass "All pods are down now. kompose down successful."
 fi
 
+convert::oc_cleanup
