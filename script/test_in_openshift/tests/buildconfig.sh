@@ -15,14 +15,12 @@
 
 # Test case for kompose up/down with etherpad
 
-set -x;
-
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
 # Run kompose up
-convert::run_cmd "kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml up"; exit_status=$?
+kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml up; exit_status=$?;
 
 if [ $exit_status -ne 0 ]; then
    convert::print_fail "kompose up fails"
@@ -62,7 +60,12 @@ fi
 # Run Kompose down
 echo "Running kompose down"
 
-convert::run_cmd "kompose --provider=openshift --emptyvols $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml
+kompose --provider=openshift --emptyvols -f $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml down; exit_status=$?;
+
+if [ $exit_status -ne 0 ]; then
+    echo "kompose down failed"
+    exit 1;
+fi
 
 sleep 60;
 

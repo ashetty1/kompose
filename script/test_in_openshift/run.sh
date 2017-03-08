@@ -25,12 +25,11 @@ convert::start_test "Functional tests on OpenShift"
 install_oc_client
 convert::oc_cluster_up
 
-# for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
-#     echo "Running ${test_case}";
-#     timeout 30 $test_case;
-# done
-
-$KOMPOSE_ROOT/script/test_in_openshift/tests/buildconfig.sh
+for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
+    echo "Running ${test_case}";
+    $test_case;
+    sleep 5;
+done
 
 convert::oc_cluster_down
 
