@@ -60,7 +60,7 @@ fi
 # Run Kompose down
 echo "Running kompose down"
 
-kompose --provider=openshift --emptyvols -f $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml down; exit_status=$?;
+kompose --provider=openshift --emptyvols -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml down; exit_status=$?;
 
 if [ $exit_status -ne 0 ]; then
     echo "kompose down failed"

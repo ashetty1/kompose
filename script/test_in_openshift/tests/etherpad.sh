@@ -22,7 +22,7 @@ source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
 
 # Env variables for etherpad
-export $(cat ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/envs)
+export $(cat ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/envs);
 
 # Run kompose up
 kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/docker-compose.yml up
