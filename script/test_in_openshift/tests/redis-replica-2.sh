@@ -21,9 +21,10 @@ source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
 # Run kompose up
-convert::cmd "kompose --provider=openshift --emptyvols --replicas 2 -f ${KOMPOSE_ROOT}/examples/docker-compose.yml up"; exit_status=$?
+kompose --provider=openshift --emptyvols --replicas 2 -f ${KOMPOSE_ROOT}/examples/docker-compose.yml up; exit_status=$?
 
 if [ $exit_status -ne 0 ]; then
+    convert::print_fail "kompose up has failed"
     exit 1;
 fi
 
@@ -58,31 +59,20 @@ fi
 # Run Kompose down
 echo "Running kompose down"
 
-
-convert::cmd "kompose --provider=openshift --emptyvols --replicas 2 -f ${KOMPOSE_ROOT}/examples/docker-compose.yml down"; exit_status=$?
+kompose --provider=openshift --emptyvols --replicas 2 -f ${KOMPOSE_ROOT}/examples/docker-compose.yml down; exit_status=$?
 
 if [ $exit_status -ne 0 ]; then
-    echo "Kompose down failed"
+    convert::print_fail "Kompose down failed"
     exit 1;
 fi
 
 
 sleep 60
 
-retry_down=0
-while [ $(oc get pods | wc -l ) != 0 ] ; do
-    if [ $retry_down -lt 10 ]; then
-	echo "Waiting for the pods to go down ..."
-	retry_down=$(($retry_down + 1))
-	sleep 30;
-    else
-	convert::print_fail "kompose down has failed to bring the pods up"
-	exit 1;
-    fi
-done
+convert::kompose_down_check
 
 if [ $(oc get pods | wc -l ) == 0 ] ; then
     convert::print_pass "All pods are down now. kompose down successful."
 fi
 
-convert::oc_cleanup
+

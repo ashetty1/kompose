@@ -27,9 +27,9 @@ install_oc_client
 
 for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
     convert::oc_cluster_up
-    echo "Running ${test_case}";
-    $test_case;
-    sleep 5;
+    echo "Running ${test_case}"
+    $test_case
+    sleep 5
     convert::oc_cluster_down
 done
 
