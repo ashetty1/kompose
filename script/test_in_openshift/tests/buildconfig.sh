@@ -31,8 +31,6 @@ fi
 # Wait
 sleep 60;
 
-oc get pods;
-
 retry_up=0
 while [ "$(oc get pods | grep foo | grep -v deploy | grep -v build | awk '{ print $3 }')" != 'Running'  ] ||
 	  [ "$(oc get pods | grep build | grep -v deploy | awk '{ print $3 }')" != 'Completed'  ] ;do
@@ -53,8 +51,8 @@ sleep 5;
 # Check if all the pods are up
 if [ "$(oc get pods | grep foo | grep -v deploy | grep -v build | awk '{ print $3 }')" == 'Running'  ] &&
        [ "$(oc get pods | grep build | grep -v deploy | awk '{ print $3 }')" == 'Completed'  ] ; then
-    convert::print_pass "All pods are Running now. kompose up is successful."
     oc get pods;
+    convert::print_pass "All pods are Running now. kompose up is successful."
 fi
 
 # Run Kompose down
