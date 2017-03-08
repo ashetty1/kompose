@@ -23,20 +23,13 @@ source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
 convert::start_test "Functional tests on OpenShift"
 install_oc_client
-convert::oc_cluster_up
+#convert::oc_cluster_up
 
-# for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
-#     echo "Running ${test_case}";
-#     $test_case;
-#     sleep 5;
-# done
-
-$KOMPOSE_ROOT/script/test_in_openshift/tests/buildconfig.sh
-
-sleep 10;
-
-$KOMPOSE_ROOT/script/test_in_openshift/tests/etherpad.sh
-
-
-convert::oc_cluster_down
+for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
+    convert::oc_cluster_up
+    echo "Running ${test_case}";
+    $test_case;
+    sleep 5;
+    convert::oc_cluster_down
+done
 

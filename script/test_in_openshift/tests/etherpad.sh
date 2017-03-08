@@ -68,17 +68,19 @@ fi
 
 sleep 60;
 
-retry_down=0
-while [ $(oc get pods | wc -l ) != 0 ] ; do
-    if [ $retry_down -lt 10 ]; then
-	echo "Waiting for the pods to go down ..."
-	retry_down=$(($retry_down + 1))
-	sleep 30;
-    else
-	convert::print_fail "kompose down has failed to bring the pods up"
-	exit 1;
-    fi
-done
+convert::kompose_down_check
+
+# retry_down=0
+# while [ $(oc get pods | wc -l ) != 0 ] ; do
+#     if [ $retry_down -lt 10 ]; then
+# 	echo "Waiting for the pods to go down ..."
+# 	retry_down=$(($retry_down + 1))
+# 	sleep 30;
+#     else
+# 	convert::print_fail "kompose down has failed to bring the pods up"
+# 	exit 1;
+#     fi
+# done
 
 if [ $(oc get pods | wc -l ) == 0 ] ; then
     convert::print_pass "All pods are down now. kompose down successful."

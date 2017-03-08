@@ -61,6 +61,21 @@ function convert::kompose_down () {
     fi
 }
 
+function convert::kompose_down_check () {
+    retry_down=0
+    while [ $(oc get pods | wc -l ) != 0 ] ; do
+	if [ $retry_down -lt 10 ]; then
+	    echo "Waiting for the pods to go down ..."
+	    oc get pods
+	    retry_down=$(($retry_down + 1))
+	    sleep 30;
+	else
+	    convert::print_fail "kompose down has failed"
+	    exit 1;
+	fi
+    done
+}
+
 function convert::oc_cleanup () {
     oc delete bc,rc,rs,svc,is,dc,deploy,images,ds,builds --all
 }
