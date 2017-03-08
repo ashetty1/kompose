@@ -6,8 +6,8 @@ function install_oc_client () {
     sudo cat /etc/default/docker
     sudo /etc/init.d/docker restart
     # FIXME
-    wget https://github.com/openshift/origin/releases/download/v1.4.1/openshift-origin-client-tools-v1.4.1-3f9807a-linux-64bit.tar.gz -O /tmp/oc.tar.gz > /dev/null
-    mkdir /tmp/ocdir && cd /tmp/ocdir && tar -xvvf /tmp/oc.tar.gz > /dev/null;
+    wget https://github.com/openshift/origin/releases/download/v1.4.1/openshift-origin-client-tools-v1.4.1-3f9807a-linux-64bit.tar.gz -O /tmp/oc.tar.gz 2> /dev/null > /dev/null
+    mkdir /tmp/ocdir && cd /tmp/ocdir && tar -xvvf /tmp/oc.tar.gz > /dev/null
     sudo mv /tmp/ocdir/*/oc /usr/bin/
 }
 
