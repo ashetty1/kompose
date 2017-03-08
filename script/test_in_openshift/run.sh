@@ -30,7 +30,7 @@ convert::oc_cluster_up
 #     timeout 30 $test_case;
 # done
 
-./$KOMPOSE_ROOT/script/test_in_openshift/tests/buildconfig.sh
+$KOMPOSE_ROOT/script/test_in_openshift/tests/buildconfig.sh
 
 convert::oc_cluster_down
 
