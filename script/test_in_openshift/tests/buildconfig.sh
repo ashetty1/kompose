@@ -33,6 +33,8 @@ fi
 # Wait
 sleep 60;
 
+oc get pods;
+
 retry_up=0
 while [ "$(oc get pods | grep foo | grep -v deploy | grep -v build | awk '{ print $3 }')" != 'Running'  ] ||
 	  [ "$(oc get pods | grep build | grep -v deploy | awk '{ print $3 }')" != 'Completed'  ] ;do
@@ -60,7 +62,7 @@ fi
 # Run Kompose down
 echo "Running kompose down"
 
-convert::kompose_down $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml
+convert::run_cmd "kompose --provider=openshift --emptyvols $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml
 
 sleep 60;
 
