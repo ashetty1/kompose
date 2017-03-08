@@ -39,8 +39,8 @@ function convert::oc_cluster_down () {
 
 function convert::kompose_up () {
     dc_file=$1
-    kompose_cli='kompose --emptyvols --provider=openshift -f ${dc_file} up'
-    convert::run_cmd $kompose_cli
+    kompose_cli='kompose --emptyvols --provider=openshift -f $dc_file up'
+    convert::run_cmd "${kompose_cli}"
     exit_status=$?
 
     if [ $exit_status -ne 0 ]; then
@@ -51,7 +51,7 @@ function convert::kompose_up () {
 
 function convert::kompose_down () {
     dc_file=$1
-    kompose_cli='kompose --emptyvols --provider=openshift -f ${dc_file} down'
+    kompose_cli='kompose --emptyvols --provider=openshift -f $dc_file down'
     convert::run_cmd $kompose_cli
     exit_status=$?
 

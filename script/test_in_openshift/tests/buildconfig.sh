@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Copyright 2017 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +20,13 @@ source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
 # Run kompose up
-convert::kompose_up ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml
+convert::run_cmd "kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml up"; exit_status=$?
+
+if [ $exit_status -ne 0 ]; then
+   convert::print_fail "kompose up fails"
+   exit 1
+fi
+
 
 # Wait
 sleep 60;
