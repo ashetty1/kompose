@@ -22,8 +22,8 @@ source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
 
 convert::start_test "Functional tests on OpenShift"
-#install_oc_client
-#convert::oc_cluster_up
+install_oc_client
+convert::oc_cluster_up
 
 for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
     echo "Running ${test_case}";
