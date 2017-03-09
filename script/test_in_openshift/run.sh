@@ -21,7 +21,7 @@ source $KOMPOSE_ROOT/kompose/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
 convert::print_msg "Hello"
-
+convert::print_pass "Hello"
 # convert::start_test "Functional tests on OpenShift"
 # install_oc_client
 #convert::oc_cluster_up
