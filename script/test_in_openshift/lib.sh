@@ -83,6 +83,6 @@ function convert::oc_cleanup () {
 function convert::print_msg () {
     tput setaf 4
     tput bold
-    echo -en "\n $@"
+    echo -e "\n $@"
     tput sgr0
 }

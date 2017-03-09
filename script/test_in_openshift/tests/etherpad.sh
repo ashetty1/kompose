@@ -16,12 +16,11 @@
 
 # Test case for kompose up/down with etherpad
 
-convert::print_msg "Testing kompose up/down with etherpad docker-compose file"
-
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
+convert::print_msg "Testing kompose up/down with etherpad docker-compose file"
 
 # Env variables for etherpad
 export $(cat ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/envs);
