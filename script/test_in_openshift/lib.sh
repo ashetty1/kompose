@@ -1,12 +1,12 @@
 #!/bin/bash
 
 function convert::print_msg () {
+    echo ""
     tput setaf 4
     tput bold
-    echo ""
     echo -e "$@"
-    echo ""
     tput sgr0
+    echo ""
 }
 
 function install_oc_client () {
