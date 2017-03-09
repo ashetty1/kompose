@@ -1,5 +1,13 @@
 #!/bin/bash
 
+function convert::print_msg () {
+    tput setaf 4
+    tput bold
+    echo -e "\n$@"
+    tput sgr0
+}
+
+
 function install_oc_client () {
     sudo sed -i 's:DOCKER_OPTS=":DOCKER_OPTS="--insecure-registry 172.30.0.0/16 :g' /etc/default/docker
     sudo mv /bin/findmnt /bin/findmnt.backup
@@ -80,11 +88,5 @@ function convert::oc_cleanup () {
     oc delete bc,rc,rs,svc,is,dc,deploy,images,ds,builds --all
 }
 
-function convert::print_msg () {
-    tput setaf 4
-    tput bold
-    echo -e "\n$@"
-    tput sgr0
-}
 
-readonly -f convert::print_msg
+
