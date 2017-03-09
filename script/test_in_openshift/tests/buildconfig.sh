@@ -19,6 +19,8 @@ KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
+convert::print_msg "Testing buildconfig on kompose"
+
 # Run kompose up
 kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml up; exit_status=$?;
 
@@ -56,31 +58,18 @@ if [ "$(oc get pods | grep foo | grep -v deploy | grep -v build | awk '{ print $
 fi
 
 # Run Kompose down
-echo "Running kompose down"
+convert::print_msg "Running kompose down"
 
 kompose --provider=openshift --emptyvols -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml down; exit_status=$?;
 
 if [ $exit_status -ne 0 ]; then
-    echo "kompose down failed"
+    convert::print_fail "kompose down failed"
     exit 1;
 fi
 
 sleep 60;
 
 convert::kompose_down_check
-
-# retry_down=0
-# while [ $(oc get pods | wc -l ) != 0 ] ; do
-#     if [ $retry_down -lt 10 ]; then
-# 	echo "Waiting for the pods to go down ..."
-# 	oc get pods
-# 	retry_down=$(($retry_down + 1))
-# 	sleep 30;
-#     else
-# 	convert::print_fail "kompose down has failed to bring the pods up"
-# 	exit 1;
-#     fi
-# done
 
 if [ $(oc get pods | wc -l ) == 0 ] ; then
     convert::print_pass "All pods are down now. kompose down successful."

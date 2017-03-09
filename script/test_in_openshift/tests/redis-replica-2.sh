@@ -20,6 +20,8 @@ KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
+convert::print_msg "Running tests for replica option"
+
 # Run kompose up
 kompose --provider=openshift --emptyvols --replicas 2 -f ${KOMPOSE_ROOT}/examples/docker-compose.yml up; exit_status=$?
 
@@ -52,12 +54,13 @@ sleep 5;
 # Check if all the pods are up
 
 if [ "$(oc get pods | grep redis | grep -v deploy |  awk '{ print $3 }'| grep 'Running' | wc -l)" -eq 2  ] && [ "$(oc get pods | grep web | grep -v deploy | awk '{ print $3 }' | grep 'Running' | wc -l)" -eq 2  ] ; then
+    convert::print_msg "oc get pods:"
+    oc get pods
     convert::print_pass "All pods are Running now. kompose up is successful with 2 replicas."
-    oc get pods;
 fi
 
 # Run Kompose down
-echo "Running kompose down"
+convert::print_msg "Running kompose down"
 
 kompose --provider=openshift --emptyvols --replicas 2 -f ${KOMPOSE_ROOT}/examples/docker-compose.yml down; exit_status=$?
 
@@ -65,7 +68,6 @@ if [ $exit_status -ne 0 ]; then
     convert::print_fail "Kompose down failed"
     exit 1;
 fi
-
 
 sleep 60
 

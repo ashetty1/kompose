@@ -16,6 +16,8 @@
 
 # Test case for kompose up/down with etherpad
 
+convert::print_msg "Testing kompose up/down with etherpad docker-compose file"
+
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
@@ -29,7 +31,7 @@ kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/script/test/fixtures
 
 
 # Wait
-sleep 120;
+sleep 60;
 
 retry_up=0
 while [ "$(oc get pods | grep etherpad | grep -v deploy | awk '{ print $3 }')" != 'Running'  ] ||
@@ -51,36 +53,26 @@ sleep 5;
 # Check if all the pods are up
 if [ "$(oc get pods | grep etherpad | grep -v deploy | awk '{ print $3 }')" == 'Running'  ] &&
        [ "$(oc get pods | grep mariadb | grep -v deploy | awk '{ print $3 }')" == 'Running'  ] ; then
+    convert::print_msg "oc get pods:"
+    oc get pods
     convert::print_pass "All pods are Running now. kompose up is successful."
-    oc get pods;
 fi
 
 # Run Kompose down
-echo "Running kompose down"
+
+convert::print_msg "Running kompose down"
 
 convert::run_cmd "kompose --provider=openshift --emptyvols -f $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml down"
 result=$?
 
 if [ $result -ne 0 ]; then
-    echo "Kompose down command failed"
+    convert::print_fail "Kompose down command failed"
     exit 1;
 fi
 
 sleep 60;
 
 convert::kompose_down_check
-
-# retry_down=0
-# while [ $(oc get pods | wc -l ) != 0 ] ; do
-#     if [ $retry_down -lt 10 ]; then
-# 	echo "Waiting for the pods to go down ..."
-# 	retry_down=$(($retry_down + 1))
-# 	sleep 30;
-#     else
-# 	convert::print_fail "kompose down has failed to bring the pods up"
-# 	exit 1;
-#     fi
-# done
 
 if [ $(oc get pods | wc -l ) == 0 ] ; then
     convert::print_pass "All pods are down now. kompose down successful."

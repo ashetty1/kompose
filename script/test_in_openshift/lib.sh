@@ -79,3 +79,10 @@ function convert::kompose_down_check () {
 function convert::oc_cleanup () {
     oc delete bc,rc,rs,svc,is,dc,deploy,images,ds,builds --all
 }
+
+function convert::print_msg () {
+    tput setaf 4
+    tput bold
+    echo -en "\n $@"
+    tput sgr0
+}
