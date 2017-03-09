@@ -4,14 +4,11 @@ KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/kompose/script/test/cmd/globals.sh
 
 function convert::print_msg () {
-    tput setaf 3
+    tput setaf 4
     tput bold
     echo -e "$@"
     tput sgr0
 }
-
-readonly -f convert::print_msg
-
 
 function install_oc_client () {
     sudo sed -i 's:DOCKER_OPTS=":DOCKER_OPTS="--insecure-registry 172.30.0.0/16 :g' /etc/default/docker
