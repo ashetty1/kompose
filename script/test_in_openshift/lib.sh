@@ -1,9 +1,9 @@
 #!/bin/bash
 
 function convert::print_msg () {
-    tput setaf 4
+    tput setaf 1
     tput bold
-    echo -en "\n$@"
+    echo -e "\n$@"
     tput sgr0
 }
 
