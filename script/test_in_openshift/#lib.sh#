@@ -87,4 +87,4 @@ function convert::print_msg () {
     tput sgr0
 }
 
-readonly -f convert::print_msg
+readonly -f 
