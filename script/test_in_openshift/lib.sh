@@ -6,7 +6,7 @@ source $KOMPOSE_ROOT/kompose/script/test/cmd/globals.sh
 function convert::print_msg () {
     tput setaf 1
     tput bold
-    echo -e "\n$@"
+    echo -e "\nsdsds$@"
     tput sgr0
 }
 
