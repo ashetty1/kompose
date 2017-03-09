@@ -20,14 +20,7 @@ KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/kompose/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
-function convert::print_msg1 () {
-    tput setaf 3
-    tput bold
-    echo -e "\n$@"
-    tput sgr0
-}
-
-convert::print_msg1 "Hello"
+convert::print_msg "Hello"
 convert::print_pass "Hello"
 # convert::start_test "Functional tests on OpenShift"
 # install_oc_client
