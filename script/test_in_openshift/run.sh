@@ -27,7 +27,6 @@ convert::oc_cluster_up
 
 for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
     convert::oc_cluster_up
-    echo -e "\nRunning ${test_case}"
     $test_case
     sleep 5
     convert::oc_cluster_down
