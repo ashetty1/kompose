@@ -3,7 +3,8 @@
 function convert::print_msg () {
     tput setaf 4
     tput bold
-    printf "$@"
+    echo -e "$@"
+    echo ""
     tput sgr0
 }
 
