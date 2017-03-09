@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x;
-
 function convert::print_msg () {
     tput setaf 4
     tput bold
@@ -28,6 +26,7 @@ function convert::oc_cluster_up () {
 
     if [ $exit_status -ne 0 ]; then
 	FAIL_MSGS=$FAIL_MSGS"exit status: $exit_status\n";
+	convert::print_fail "oc cluster up failed"
 	exit $exit_status;
     fi
 

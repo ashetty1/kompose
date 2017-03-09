@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x;
-
 # Copyright 2017 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
