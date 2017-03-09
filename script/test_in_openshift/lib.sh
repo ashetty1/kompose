@@ -4,9 +4,9 @@ KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/kompose/script/test/cmd/globals.sh
 
 function convert::print_msg () {
-    BLUE=$(tput setaf 3)
-    BOLD=$(tput bold)
-    echo -e ${BLUE}${BOLD}"\n$@"
+    tput setaf 3
+    tput bold
+    echo -e "\n$@"
     tput sgr0
 }
 
