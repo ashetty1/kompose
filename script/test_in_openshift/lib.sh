@@ -4,11 +4,13 @@ KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/kompose/script/test/cmd/globals.sh
 
 function convert::print_msg () {
-    tput setaf 1
-    tput bold
-    echo -e "\nsdsds$@"
+    BLUE=$(tput setaf 3)
+    BOLD=$(tput bold)
+    echo -e ${BLUE}${BOLD}"\n$@"
     tput sgr0
 }
+
+readonly -f convert::print_msg
 
 
 function install_oc_client () {
