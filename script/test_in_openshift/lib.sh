@@ -1,7 +1,7 @@
 #!/bin/bash
 
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
-source $KOMPOSE_ROOT/script/test/cmd/globals.sh
+source $KOMPOSE_ROOT/kompose/script/test/cmd/globals.sh
 
 function convert::print_msg () {
     tput setaf 1
