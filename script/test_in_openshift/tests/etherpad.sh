@@ -23,57 +23,30 @@ source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 convert::print_msg "Testing kompose up/down with etherpad docker-compose file"
 
 # Env variables for etherpad
-export $(cat ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/envs);
+export $(cat ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/envs)
 
 # Run kompose up
 kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/docker-compose.yml up
 
 
 # Wait
-sleep 60;
+sleep 60
 
-retry_up=0
-while [ "$(oc get pods | grep etherpad | grep -v deploy | awk '{ print $3 }')" != 'Running'  ] ||
-	  [ "$(oc get pods | grep mariadb | grep -v deploy | awk '{ print $3 }')" != 'Running'  ] ;do
+# Check if the pods are up
+convert::kompose_up_check -p "etherpad mariadb"
 
-    if [ $retry_up -lt 10 ]; then
-	echo "Waiting for the pods to come up ..."
-	retry_up=$(($retry_up + 1))
-	sleep 30
-    else
-	convert::print_fail "kompose up has failed to bring the pods up"
-	exit 1
-    fi
-done
-
-# Wait
-sleep 5;
-
-# Check if all the pods are up
-if [ "$(oc get pods | grep etherpad | grep -v deploy | awk '{ print $3 }')" == 'Running'  ] &&
-       [ "$(oc get pods | grep mariadb | grep -v deploy | awk '{ print $3 }')" == 'Running'  ] ; then
-    convert::print_msg "oc get pods:"
-    oc get pods
-    convert::print_pass "All pods are Running now. kompose up is successful."
-fi
 
 # Run Kompose down
-
-convert::print_msg "Running kompose down"
-
+convert::print_msg "Running kompose down"\
 convert::run_cmd "kompose --provider=openshift --emptyvols -f $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml down"
 result=$?
 
 if [ $result -ne 0 ]; then
     convert::print_fail "Kompose down command failed"
-    exit 1;
+    exit 1
 fi
 
-sleep 60;
+sleep 60
 
 convert::kompose_down_check
-
-if [ $(oc get pods | wc -l ) == 0 ] ; then
-    convert::print_pass "All pods are down now. kompose down successful."
-fi
 

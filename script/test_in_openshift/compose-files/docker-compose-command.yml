@@ -1,0 +1,7 @@
+version: '2'
+
+services:
+  base:
+    image: busybox
+    command: ['sleep','10000']
+    

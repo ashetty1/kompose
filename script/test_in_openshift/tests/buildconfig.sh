@@ -22,7 +22,7 @@ source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 convert::print_msg "Testing buildconfig on kompose"
 
 # Run kompose up
-kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml up; exit_status=$?;
+kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml up; exit_status=$?
 
 if [ $exit_status -ne 0 ]; then
    convert::print_fail "kompose up fails"
@@ -31,48 +31,21 @@ fi
 
 
 # Wait
-sleep 60;
+sleep 60
 
-retry_up=0
-while [ "$(oc get pods | grep foo | grep -v deploy | grep -v build | awk '{ print $3 }')" != 'Running'  ] ||
-	  [ "$(oc get pods | grep build | grep -v deploy | awk '{ print $3 }')" != 'Completed'  ] ;do
-
-    if [ $retry_up -lt 10 ]; then
-	echo "Waiting for the pods to come up ..."
-	retry_up=$(($retry_up + 1))
-	sleep 30
-    else
-	convert::print_fail "kompose up has failed to bring the pods up"
-	exit 1
-    fi
-done
-
-# Wait
-sleep 5;
-
-# Check if all the pods are up
-if [ "$(oc get pods | grep foo | grep -v deploy | grep -v build | awk '{ print $3 }')" == 'Running'  ] &&
-       [ "$(oc get pods | grep build | grep -v deploy | awk '{ print $3 }')" == 'Completed'  ] ; then
-    oc get pods;
-    convert::print_pass "All pods are Running now. kompose up is successful."
-fi
+# Check if the pods are up.
+convert::kompose_up_check -p foo
 
 # Run Kompose down
 convert::print_msg "Running kompose down"
 
-kompose --provider=openshift --emptyvols -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml down; exit_status=$?;
+kompose --provider=openshift --emptyvols -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml down; exit_status=$?
 
 if [ $exit_status -ne 0 ]; then
     convert::print_fail "kompose down failed"
-    exit 1;
+    exit 1
 fi
 
 sleep 60;
 
 convert::kompose_down_check
-
-if [ $(oc get pods | wc -l ) == 0 ] ; then
-    convert::print_pass "All pods are down now. kompose down successful."
-fi
-
-
