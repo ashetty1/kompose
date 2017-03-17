@@ -82,7 +82,7 @@ function convert::kompose_down () {
 
     if [ $exit_status -ne 0 ]; then
 	FAIL_MSGS=$FAIL_MSGS"kompose down failed with exit status: $exit_status\n";
-	exit $exit_status;
+	exit $exit_status
     fi
 }
 
@@ -161,10 +161,10 @@ function convert::kompose_down_check () {
 	    echo "Waiting for the pods to go down ..."
 	    oc get pods
 	    retry_down=$(($retry_down + 1))
-	    sleep 30;
+	    sleep 30
 	else
 	    convert::print_fail "kompose down has failed"
-	    exit 1;
+	    exit 1
 	fi
     done
 
