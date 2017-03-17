@@ -90,7 +90,7 @@ function convert::kompose_down () {
 function convert::kompose_up_check () {
     # Usage: -p for pod name, -r replica count
     local retry_up=0
-    
+   
     while getopts ":p:r:" opt; do
 	case $opt in
 	    p ) pod=$OPTARG;;
@@ -106,9 +106,11 @@ function convert::kompose_up_check () {
        replica_2=$replica
     fi
 
+    echo $pod
+    
     pod_1=$( echo $pod | awk '{ print $1 }')
     pod_2=$( echo $pod | awk '{ print $2 }')
-
+    
     query_1='grep ${pod_1} | grep -v deploy'
     query_2='grep ${pod_2} | grep -v deploy'
     
