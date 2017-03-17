@@ -120,8 +120,8 @@ function convert::kompose_up_check () {
     if [ $is_buildconfig -gt 0 ]; then
 	query_1='grep ${pod_1} | grep -v deploy | grep -v build'
 	query_2='grep build | grep -v deploy'
-	$query_2_status='Completed'
-	$replica_2=1 
+	query_2_status='Completed'
+	replica_2=1 
     fi
     
     # FIXME: Make this generic to cover all cases
