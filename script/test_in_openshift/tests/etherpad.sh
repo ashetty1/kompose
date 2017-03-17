@@ -26,8 +26,12 @@ convert::print_msg "Testing kompose up/down with etherpad docker-compose file"
 export $(cat ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/envs)
 
 # Run kompose up
-kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/docker-compose.yml up
+kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/script/test/fixtures/etherpad/docker-compose.yml up; exit_status=$?
 
+if [ $exit_status -ne 0 ]; then
+    convert::print_fail "kompose up fails"
+    exit 1
+fi
 
 # Wait
 sleep 60
@@ -37,12 +41,12 @@ convert::kompose_up_check -p "etherpad mariadb"
 
 
 # Run Kompose down
-convert::print_msg "Running kompose down"\
-convert::run_cmd "kompose --provider=openshift --emptyvols -f $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml down"
-result=$?
+convert::print_msg "Running kompose down"
 
-if [ $result -ne 0 ]; then
-    convert::print_fail "Kompose down command failed"
+kompose --provider=openshift --emptyvols -f $KOMPOSE_ROOT/script/test/fixtures/etherpad/docker-compose.yml down; exit_status=$?
+
+if [ $exit_status -ne 0 ]; then
+    convert::print_fail "kompose down failed"
     exit 1
 fi
 

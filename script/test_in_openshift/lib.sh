@@ -108,30 +108,27 @@ function convert::kompose_up_check () {
 
     pod_1=$( echo $pod | awk '{ print $1 }')
     pod_2=$( echo $pod | awk '{ print $2 }')
+
+    query_1='grep ${pod_1} | grep -v deploy'
+    query_2='grep ${pod_2} | grep -v deploy'
+    
+    query_1_status='Running'
+    query_2_status='Running'
     
     is_buildconfig=$(oc get builds --no-headers | wc -l)
 
     if [ $is_buildconfig -gt 0 ]; then
 	query_1='grep ${pod_1} | grep -v deploy | grep -v build'
 	query_2='grep build | grep -v deploy'
-	query_1_status='Running'
-	query_2_status='Completed'
-	replica_1_count=$replica_1
-	replica_2_count=1 
-    else
-	query_1='grep ${pod_1} | grep -v deploy'
-	query_2='grep ${pod_2} | grep -v deploy'
-	query_1_status='Running'
-	query_2_status='Running'
-	replica_1_count=$replica_1
-	replica_2_count=$replica_2
+	$query_2_status='Completed'
+	$replica_2=1 
     fi
     
     # FIXME: Make this generic to cover all cases
     while [ $(oc get pods | eval ${query_1} | awk '{ print $3 }' | \
-		     grep ${query_1_status} | wc -l) -ne $replica_1_count ] ||
+		     grep ${query_1_status} | wc -l) -ne $replica_1 ] ||
 	      [ $(oc get pods | eval ${query_2} | awk '{ print $3 }' | \
-			 grep ${query_2_status} | wc -l) -ne $replica_2_count ]; do
+			 grep ${query_2_status} | wc -l) -ne $replica_2 ]; do
 
 	if [ $retry_up -lt 10 ]; then
 	    echo "Waiting for the pods to come up ..."
@@ -149,9 +146,9 @@ function convert::kompose_up_check () {
 
     # If pods are up, print a success message
     if [ $(oc get pods | eval ${query_1} | awk '{ print $3 }' | \
-		  grep ${query_1_status} | wc -l) -eq $replica_1_count ] &&
+		  grep ${query_1_status} | wc -l) -eq $replica_1 ] &&
 	   [ $(oc get pods | eval ${query_2} | awk '{ print $3 }' | \
-		      grep ${query_2_status} | wc -l) -eq $replica_2_count ]; then
+		      grep ${query_2_status} | wc -l) -eq $replica_2 ]; then
 	oc get pods
 	convert::print_pass "All pods are Running now. kompose up is successful."
     fi
