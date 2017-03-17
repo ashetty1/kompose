@@ -14,32 +14,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Test case for kompose up/down with etherpad
 
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
-convert::print_msg "Running tests for replica option"
+convert::print_msg "Running tests with entrypoint/command option"
 
 # Run kompose up
-kompose --provider=openshift --emptyvols --replicas 2 -f ${KOMPOSE_ROOT}/examples/docker-compose.yml up; exit_status=$?
+kompose --provider=openshift --emptyvols -f ${KOMPOSE_ROOT}/script/test_in_openshift/compose-files/docker-compose-command.yml up; exit_status=$?
 
 if [ $exit_status -ne 0 ]; then
     convert::print_fail "kompose up has failed"
     exit 1
 fi
 
-# Wait for some time ...
+# Wait
 sleep 60
 
-# Check if redis and web pods are up. Replica count: 2
-convert::kompose_up_check -p "redis web" -r 2
+convert::kompose_up_check -p 'base1 base2'
 
 # Run Kompose down
 convert::print_msg "Running kompose down"
 
-kompose --provider=openshift --emptyvols --replicas 2 -f ${KOMPOSE_ROOT}/examples/docker-compose.yml down; exit_status=$?
+kompose --provider=openshift --emptyvols -f ${KOMPOSE_ROOT}/script/test_in_openshift/compose-files/docker-compose-command.yml down; exit_status=$?
 
 if [ $exit_status -ne 0 ]; then
     convert::print_fail "Kompose down failed"
@@ -49,4 +47,3 @@ fi
 sleep 60
 
 convert::kompose_down_check
-
