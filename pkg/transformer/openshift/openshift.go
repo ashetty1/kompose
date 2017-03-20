@@ -26,7 +26,7 @@ import (
 	"github.com/kubernetes-incubator/kompose/pkg/kobject"
 	"github.com/kubernetes-incubator/kompose/pkg/transformer/kubernetes"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 
 	"k8s.io/kubernetes/pkg/api"
 	kapi "k8s.io/kubernetes/pkg/api"
@@ -44,6 +44,7 @@ import (
 	deploymentconfigreaper "github.com/openshift/origin/pkg/deploy/cmd"
 	imageapi "github.com/openshift/origin/pkg/image/api"
 	routeapi "github.com/openshift/origin/pkg/route/api"
+	"github.com/pkg/errors"
 	"k8s.io/kubernetes/pkg/kubectl"
 	"k8s.io/kubernetes/pkg/util/intstr"
 )
@@ -170,10 +171,10 @@ func (o *OpenShift) initImageStream(name string, service kobject.ServiceConfig) 
 }
 
 // initBuildConfig initialize Openshifts BuildConfig Object
-func initBuildConfig(name string, service kobject.ServiceConfig, composeFileDir string, repo string, branch string) *buildapi.BuildConfig {
+func initBuildConfig(name string, service kobject.ServiceConfig, composeFileDir string, repo string, branch string) (*buildapi.BuildConfig, error) {
 	contextDir, err := getAbsBuildContext(service.Build, composeFileDir)
 	if err != nil {
-		logrus.Fatalf("[%s] Buildconfig cannot be created due to error in creating build context.", name)
+		return nil, errors.Wrap(err, name+"buildconfig cannot be created due to error in creating build context, getAbsBuildContext failed")
 	}
 
 	bc := &buildapi.BuildConfig{
@@ -210,7 +211,7 @@ func initBuildConfig(name string, service kobject.ServiceConfig, composeFileDir 
 			},
 		},
 	}
-	return bc
+	return bc, nil
 }
 
 // initDeploymentConfig initialize OpenShifts DeploymentConfig object
@@ -295,10 +296,10 @@ func (o *OpenShift) initRoute(name string, service kobject.ServiceConfig, port i
 
 // Transform maps komposeObject to openshift objects
 // returns objects that are already sorted in the way that Services are first
-func (o *OpenShift) Transform(komposeObject kobject.KomposeObject, opt kobject.ConvertOptions) []runtime.Object {
+func (o *OpenShift) Transform(komposeObject kobject.KomposeObject, opt kobject.ConvertOptions) ([]runtime.Object, error) {
 	noSupKeys := o.Kubernetes.CheckUnsupportedKey(&komposeObject, unsupportedKey)
 	for _, keyName := range noSupKeys {
-		logrus.Warningf("OpenShift provider doesn't support %s key - ignoring", keyName)
+		log.Warningf("OpenShift provider doesn't support %s key - ignoring", keyName)
 	}
 	// this will hold all the converted data
 	var allobjects []runtime.Object
@@ -315,7 +316,7 @@ func (o *OpenShift) Transform(komposeObject kobject.KomposeObject, opt kobject.C
 		if service.Restart == "no" || service.Restart == "on-failure" {
 			// Error out if Controller Object is specified with restart: 'on-failure'
 			if opt.IsDeploymentConfigFlag {
-				logrus.Fatalf("Controller object cannot be specified with restart: 'on-failure'")
+				return nil, errors.New("Controller object cannot be specified with restart: 'on-failure'")
 			}
 			pod := o.InitPod(name, service)
 			objects = append(objects, pod)
@@ -333,30 +334,34 @@ func (o *OpenShift) Transform(komposeObject kobject.KomposeObject, opt kobject.C
 				if !hasBuild {
 					composeFileDir, err = getComposeFileDir(opt.InputFiles)
 					if err != nil {
-						logrus.Warningf("Error in detecting compose file's directory.")
+						log.Warningf("Error in detecting compose file's directory.")
 						continue
 					}
 					if !hasGitBinary() && (buildRepo == "" || buildBranch == "") {
-						logrus.Fatalf("Git is not installed! Please install Git to create buildconfig, else supply source repository and branch to use for build using '--build-repo', '--build-branch' options respectively")
+						return nil, errors.New("Git is not installed! Please install Git to create buildconfig, else supply source repository and branch to use for build using '--build-repo', '--build-branch' options respectively")
 					}
 					if buildBranch == "" {
 						buildBranch, err = getGitCurrentBranch(composeFileDir)
 						if err != nil {
-							logrus.Fatalf("Buildconfig cannot be created because current git branch couldn't be detected.")
+							return nil, errors.Wrap(err, "Buildconfig cannot be created because current git branch couldn't be detected.")
 						}
 					}
 					if opt.BuildRepo == "" {
 						if err != nil {
-							logrus.Fatalf("Buildconfig cannot be created because remote for current git branch couldn't be detected.")
+							return nil, errors.Wrap(err, "Buildconfig cannot be created because remote for current git branch couldn't be detected.")
 						}
 						buildRepo, err = getGitCurrentRemoteURL(composeFileDir)
 						if err != nil {
-							logrus.Fatalf("Buildconfig cannot be created because git remote origin repo couldn't be detected.")
+							return nil, errors.Wrap(err, "Buildconfig cannot be created because git remote origin repo couldn't be detected.")
 						}
 					}
 					hasBuild = true
 				}
-				objects = append(objects, initBuildConfig(name, service, composeFileDir, buildRepo, buildBranch)) // Openshift BuildConfigs
+				bc, err := initBuildConfig(name, service, composeFileDir, buildRepo, buildBranch)
+				if err != nil {
+					return nil, errors.Wrap(err, "initBuildConfig failed")
+				}
+				objects = append(objects, bc) // Openshift BuildConfigs
 			}
 
 			// If ports not provided in configuration we will not make service
@@ -378,13 +383,13 @@ func (o *OpenShift) Transform(komposeObject kobject.KomposeObject, opt kobject.C
 	}
 
 	if hasBuild {
-		logrus.Infof("Buildconfig using %s::%s as source.", buildRepo, buildBranch)
+		log.Infof("Buildconfig using %s::%s as source.", buildRepo, buildBranch)
 	}
 	// If docker-compose has a volumes_from directive it will be handled here
 	o.VolumesFrom(&allobjects, komposeObject)
 	// sort all object so Services are first
 	o.SortServicesFirst(&allobjects)
-	return allobjects
+	return allobjects, nil
 }
 
 // Create OpenShift client, returns OpenShift client
@@ -403,7 +408,12 @@ func (o *OpenShift) getOpenShiftClient() (*oclient.Client, error) {
 // Deploy transofrms and deploys kobject to OpenShift
 func (o *OpenShift) Deploy(komposeObject kobject.KomposeObject, opt kobject.ConvertOptions) error {
 	//Convert komposeObject
-	objects := o.Transform(komposeObject, opt)
+	objects, err := o.Transform(komposeObject, opt)
+
+	if err != nil {
+		return errors.Wrap(err, "o.Transform failed")
+	}
+
 	pvcStr := " "
 	if !opt.EmptyVols {
 		pvcStr = " and PersistentVolumeClaims "
@@ -427,43 +437,43 @@ func (o *OpenShift) Deploy(komposeObject kobject.KomposeObject, opt kobject.Conv
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully created ImageStream: %s", t.Name)
+			log.Infof("Successfully created ImageStream: %s", t.Name)
 		case *buildapi.BuildConfig:
 			_, err := oclient.BuildConfigs(namespace).Create(t)
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully created BuildConfig: %s", t.Name)
+			log.Infof("Successfully created BuildConfig: %s", t.Name)
 		case *deployapi.DeploymentConfig:
 			_, err := oclient.DeploymentConfigs(namespace).Create(t)
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully created DeploymentConfig: %s", t.Name)
+			log.Infof("Successfully created DeploymentConfig: %s", t.Name)
 		case *api.Service:
 			_, err := kclient.Services(namespace).Create(t)
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully created Service: %s", t.Name)
+			log.Infof("Successfully created Service: %s", t.Name)
 		case *api.PersistentVolumeClaim:
 			_, err := kclient.PersistentVolumeClaims(namespace).Create(t)
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully created PersistentVolumeClaim: %s", t.Name)
+			log.Infof("Successfully created PersistentVolumeClaim: %s", t.Name)
 		case *routeapi.Route:
 			_, err := oclient.Routes(namespace).Create(t)
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully created Route: %s", t.Name)
+			log.Infof("Successfully created Route: %s", t.Name)
 		case *api.Pod:
 			_, err := kclient.Pods(namespace).Create(t)
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully created Pod: %s", t.Name)
+			log.Infof("Successfully created Pod: %s", t.Name)
 		}
 	}
 
@@ -480,7 +490,11 @@ func (o *OpenShift) Deploy(komposeObject kobject.KomposeObject, opt kobject.Conv
 //Undeploy removes deployed artifacts from OpenShift cluster
 func (o *OpenShift) Undeploy(komposeObject kobject.KomposeObject, opt kobject.ConvertOptions) error {
 	//Convert komposeObject
-	objects := o.Transform(komposeObject, opt)
+	objects, err := o.Transform(komposeObject, opt)
+
+	if err != nil {
+		return errors.Wrap(err, "o.Transform failed")
+	}
 
 	oclient, err := o.getOpenShiftClient()
 	if err != nil {
@@ -499,14 +513,14 @@ func (o *OpenShift) Undeploy(komposeObject kobject.KomposeObject, opt kobject.Co
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully deleted ImageStream: %s", t.Name)
+			log.Infof("Successfully deleted ImageStream: %s", t.Name)
 
 		case *buildapi.BuildConfig:
 			err := oclient.BuildConfigs(namespace).Delete(t.Name)
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully deleted BuildConfig: %s", t.Name)
+			log.Infof("Successfully deleted BuildConfig: %s", t.Name)
 
 		case *deployapi.DeploymentConfig:
 			// delete deploymentConfig
@@ -515,7 +529,7 @@ func (o *OpenShift) Undeploy(komposeObject kobject.KomposeObject, opt kobject.Co
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully deleted DeploymentConfig: %s", t.Name)
+			log.Infof("Successfully deleted DeploymentConfig: %s", t.Name)
 
 		case *api.Service:
 			//delete svc
@@ -528,7 +542,7 @@ func (o *OpenShift) Undeploy(komposeObject kobject.KomposeObject, opt kobject.Co
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully deleted Service: %s", t.Name)
+			log.Infof("Successfully deleted Service: %s", t.Name)
 
 		case *api.PersistentVolumeClaim:
 			// delete pvc
@@ -536,7 +550,7 @@ func (o *OpenShift) Undeploy(komposeObject kobject.KomposeObject, opt kobject.Co
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully deleted PersistentVolumeClaim: %s", t.Name)
+			log.Infof("Successfully deleted PersistentVolumeClaim: %s", t.Name)
 
 		case *routeapi.Route:
 			// delete route
@@ -544,7 +558,7 @@ func (o *OpenShift) Undeploy(komposeObject kobject.KomposeObject, opt kobject.Co
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully deleted Route: %s", t.Name)
+			log.Infof("Successfully deleted Route: %s", t.Name)
 
 		case *api.Pod:
 			rpPod, err := kubectl.ReaperFor(api.Kind("Pod"), kclient)
@@ -556,7 +570,7 @@ func (o *OpenShift) Undeploy(komposeObject kobject.KomposeObject, opt kobject.Co
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Successfully deleted Pod: %s", t.Name)
+			log.Infof("Successfully deleted Pod: %s", t.Name)
 		}
 	}
 	return nil
