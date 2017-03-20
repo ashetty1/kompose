@@ -43,7 +43,7 @@ go get -u github.com/kubernetes-incubator/kompose
 
 #### GitHub release
 
-Grabbing the latest release from the [GitHub release page](https://github.com/kubernetes-incubator/kompose/releases) for your OS.
+Kompose is released via GitHub on a three-week cycle, you can see all current releases on the [GitHub release page](https://github.com/kubernetes-incubator/kompose/releases).
 
 ```sh
 # Linux 
@@ -76,6 +76,14 @@ Kompose is in Fedora 24 and 25 repositories. You can install it just like any ot
 
 ```bash
 sudo dnf -y install kompose
+```
+
+#### Mac OS X
+On Mac OS X you can install latest release via [Homebrew](https://brew.sh):
+
+```bash
+brew install kompose
+
 ```
 
 ## Shell autocompletion

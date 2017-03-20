@@ -27,12 +27,13 @@ import (
 
 	"k8s.io/kubernetes/pkg/api"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/docker/libcompose/config"
 	"github.com/docker/libcompose/lookup"
 	"github.com/docker/libcompose/project"
 	"github.com/fatih/structs"
 	"github.com/kubernetes-incubator/kompose/pkg/kobject"
+	"github.com/pkg/errors"
 )
 
 // Compose is docker compose file loader, implements Loader interface
@@ -50,6 +51,8 @@ func checkUnsupportedKey(composeProject *project.Project) []string {
 	// to make sure that unsupported key is not going to be reported twice
 	// by keeping record if already saw this key in another service
 	var unsupportedKey = map[string]bool{
+		"CapAdd":        false,
+		"CapDrop":       false,
 		"CgroupParent":  false,
 		"Devices":       false,
 		"DependsOn":     false,
@@ -76,6 +79,7 @@ func checkUnsupportedKey(composeProject *project.Project) []string {
 		"Ulimits":       false,
 		"Dockerfile":    false,
 		"Net":           false,
+		"Sysctls":       false,
 		"Networks":      false, // there are special checks for Network in checkUnsupportedKey function
 	}
 
@@ -86,7 +90,7 @@ func checkUnsupportedKey(composeProject *project.Project) []string {
 	// Check to see if the default network is available and length is only equal to one.
 	// Else, warn the user that root level networks are not supported (yet)
 	if _, ok := composeProject.NetworkConfigs["default"]; ok && len(composeProject.NetworkConfigs) == 1 {
-		logrus.Debug("Default network found")
+		log.Debug("Default network found")
 	} else if len(composeProject.NetworkConfigs) > 0 {
 		keysFound = append(keysFound, "root level networks")
 	}
@@ -272,7 +276,7 @@ func loadPorts(composePorts []string) ([]kobject.Ports, error) {
 }
 
 // LoadFile loads compose file into KomposeObject
-func (c *Compose) LoadFile(files []string) kobject.KomposeObject {
+func (c *Compose) LoadFile(files []string) (kobject.KomposeObject, error) {
 	komposeObject := kobject.KomposeObject{
 		ServiceConfigs: make(map[string]kobject.ServiceConfig),
 		LoadedFrom:     "compose",
@@ -287,7 +291,7 @@ func (c *Compose) LoadFile(files []string) kobject.KomposeObject {
 	if context.EnvironmentLookup == nil {
 		cwd, err := os.Getwd()
 		if err != nil {
-			return kobject.KomposeObject{}
+			return kobject.KomposeObject{}, nil
 		}
 		context.EnvironmentLookup = &lookup.ComposableEnvLookup{
 			Lookups: []config.EnvironmentLookup{
@@ -303,12 +307,12 @@ func (c *Compose) LoadFile(files []string) kobject.KomposeObject {
 	composeObject := project.NewProject(context, nil, nil)
 	err := composeObject.Parse()
 	if err != nil {
-		logrus.Fatalf("Failed to load compose file: %v", err)
+		return kobject.KomposeObject{}, errors.Wrap(err, "composeObject.Parse() failed, Failed to load compose file")
 	}
 
 	noSupKeys := checkUnsupportedKey(composeObject)
 	for _, keyName := range noSupKeys {
-		logrus.Warningf("Unsupported %s key - ignoring", keyName)
+		log.Warningf("Unsupported %s key - ignoring", keyName)
 	}
 
 	for name, composeServiceConfig := range composeObject.ServiceConfigs.All() {
@@ -326,7 +330,7 @@ func (c *Compose) LoadFile(files []string) kobject.KomposeObject {
 		// load ports
 		ports, err := loadPorts(composeServiceConfig.Ports)
 		if err != nil {
-			logrus.Fatalf("%q failed to load ports from compose file: %v", name, err)
+			return kobject.KomposeObject{}, errors.Wrap(err, "loadPorts failed. "+name+" failed to load ports from compose file")
 		}
 		serviceConfig.Port = ports
 
@@ -344,7 +348,12 @@ func (c *Compose) LoadFile(files []string) kobject.KomposeObject {
 		for key, value := range composeServiceConfig.Labels {
 			switch key {
 			case "kompose.service.type":
-				serviceConfig.ServiceType = handleServiceType(value)
+				serviceType, err := handleServiceType(value)
+				if err != nil {
+					return kobject.KomposeObject{}, errors.Wrap(err, "handleServiceType failed")
+				}
+
+				serviceConfig.ServiceType = serviceType
 			case "kompose.service.expose":
 				serviceConfig.ExposeService = strings.ToLower(value)
 			}
@@ -366,24 +375,23 @@ func (c *Compose) LoadFile(files []string) kobject.KomposeObject {
 		serviceConfig.Stdin = composeServiceConfig.StdinOpen
 		serviceConfig.Tty = composeServiceConfig.Tty
 		serviceConfig.MemLimit = composeServiceConfig.MemLimit
-
+		serviceConfig.TmpFs = composeServiceConfig.Tmpfs
 		komposeObject.ServiceConfigs[name] = serviceConfig
 	}
 
-	return komposeObject
+	return komposeObject, nil
 }
 
-func handleServiceType(ServiceType string) string {
+func handleServiceType(ServiceType string) (string, error) {
 	switch strings.ToLower(ServiceType) {
 	case "", "clusterip":
-		return string(api.ServiceTypeClusterIP)
+		return string(api.ServiceTypeClusterIP), nil
 	case "nodeport":
-		return string(api.ServiceTypeNodePort)
+		return string(api.ServiceTypeNodePort), nil
 	case "loadbalancer":
-		return string(api.ServiceTypeLoadBalancer)
+		return string(api.ServiceTypeLoadBalancer), nil
 	default:
-		logrus.Fatalf("Unknown value '%s', supported values are 'NodePort, ClusterIP or LoadBalancer'", ServiceType)
-		return ""
+		return "", errors.New("Unknown value " + ServiceType + " , supported values are 'NodePort, ClusterIP or LoadBalancer'")
 	}
 }
 
