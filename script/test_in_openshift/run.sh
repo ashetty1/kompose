@@ -33,5 +33,5 @@ for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
     #convert::oc_cluster_down
 done
 
-conver::oc_cluster_down
+convert::oc_cluster_down
 
