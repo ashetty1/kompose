@@ -130,7 +130,7 @@ function convert::kompose_up_check () {
 	      [ $(oc get pods | eval ${query_2} | awk '{ print $3 }' | \
 			 grep ${query_2_status} | wc -l) -ne $replica_2 ]; do
 
-	if [ $retry_up -lt 10 ]; then
+	if [ $retry_up -lt 5 ]; then
 	    echo "Waiting for the pods to come up ..."
 	    retry_up=$(($retry_up + 1))
 	    sleep 30
@@ -157,7 +157,7 @@ function convert::kompose_up_check () {
 function convert::kompose_down_check () {
     retry_down=0
     while [ $(oc get pods | wc -l ) != 0 ] ; do
-	if [ $retry_down -lt 10 ]; then
+	if [ $retry_down -lt 5 ]; then
 	    echo "Waiting for the pods to go down ..."
 	    oc get pods
 	    retry_down=$(($retry_down + 1))
@@ -178,6 +178,6 @@ function convert::kompose_down_check () {
 }
 
 function convert::oc_cleanup () {
-    oc delete bc,rc,rs,svc,is,dc,deploy,images,ds,builds --all
+    oc delete bc,rc,rs,svc,is,dc,deploy,ds,builds --all > /dev/null
 }
 
