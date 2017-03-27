@@ -32,7 +32,7 @@ fi
 # Wait
 sleep 60;
 
-convert::kompose_up_check -s "'6379/TCP,1234/UDP' '5000/TCP'"
+# convert::kompose_up_check -s "'6379/TCP,1234/UDP' '5000/TCP'"
 
 # Run Kompose down
 convert::print_msg "Running kompose down"

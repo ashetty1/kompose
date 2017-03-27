@@ -105,8 +105,6 @@ function convert::kompose_up_check () {
        replica_1=$replica
        replica_2=$replica
     fi
-
-    echo $pod
     
     pod_1=$( echo $pod | awk '{ print $1 }')
     pod_2=$( echo $pod | awk '{ print $2 }')
