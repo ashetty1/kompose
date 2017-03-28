@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Test case for kompose up/down with etherpad
+# Master script for running kompose testcases on OpenShift
 
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/kompose/script/test/cmd/lib.sh
