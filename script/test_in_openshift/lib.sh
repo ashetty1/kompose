@@ -157,7 +157,7 @@ function convert::kompose_up_check () {
 function convert::kompose_down_check () {
     retry_down=0
     local pod_count=$1
-    while [ $(oc get pods | wc -l ) != 0 ] ||
+    while [ $(oc get pods | wc -l ) != 0 ] &&
 	  [ $(oc get pods | grep -v deploy | grep 'Terminating' | wc -l ) != $pod_count ]; do
 	if [ $retry_down -lt 5 ]; then
 	    echo "Waiting for the pods to go down ..."
