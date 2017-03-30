@@ -23,7 +23,7 @@ install:
   - true
 
 script:
-  - make install
+  - make test
   - make test-openshift
 
 after_success:
