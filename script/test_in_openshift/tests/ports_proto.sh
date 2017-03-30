@@ -30,7 +30,7 @@ if [ $exit_status -ne 0 ]; then
 fi
 
 # Wait
-sleep 60;
+sleep 10
 
 # convert::kompose_up_check -s "'6379/TCP,1234/UDP' '5000/TCP'"
 
@@ -44,7 +44,7 @@ if [ $exit_status -ne 0 ]; then
     exit 1
 fi
 
-sleep 60
+sleep 10
 
 
 convert::kompose_down_check

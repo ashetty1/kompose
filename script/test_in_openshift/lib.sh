@@ -133,7 +133,7 @@ function convert::kompose_up_check () {
 	if [ $retry_up -lt 5 ]; then
 	    echo "Waiting for the pods to come up ..."
 	    retry_up=$(($retry_up + 1))
-	    sleep 30
+	    sleep 10
 	else
 	    convert::print_fail "kompose up has failed to bring the pods up"
 	    exit 1
@@ -142,7 +142,7 @@ function convert::kompose_up_check () {
     done
 
     # Wait
-    sleep 5
+    sleep 2
 
     # If pods are up, print a success message
     if [ $(oc get pods | eval ${query_1} | awk '{ print $3 }' | \
@@ -161,15 +161,15 @@ function convert::kompose_down_check () {
 	    echo "Waiting for the pods to go down ..."
 	    oc get pods
 	    retry_down=$(($retry_down + 1))
-	    sleep 30;
+	    sleep 10
 	else
 	    convert::print_fail "kompose down has failed"
-	    exit 1;
+	    exit 1
 	fi
     done
 
     # Wait
-    sleep 5;
+    sleep 2;
 
     # Print a message if all the pods are down
     if [ $(oc get pods | wc -l ) == 0 ] ; then

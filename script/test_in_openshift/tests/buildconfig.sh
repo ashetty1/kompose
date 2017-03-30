@@ -31,7 +31,7 @@ fi
 
 
 # Wait
-sleep 60
+sleep 10
 
 # Check if the pods are up.
 convert::kompose_up_check -p foo
@@ -46,6 +46,6 @@ if [ $exit_status -ne 0 ]; then
     exit 1
 fi
 
-sleep 60;
+sleep 10
 
 convert::kompose_down_check
