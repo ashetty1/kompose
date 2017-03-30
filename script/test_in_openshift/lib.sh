@@ -175,7 +175,7 @@ function convert::kompose_down_check () {
 
     # Print a message if all the pods are down
     if [ $(oc get pods | wc -l ) == 0 ] ||
-       [ $(oc get pods | grep -v deploy | grep 'Terminating' | wc -l ) == $pod_count; then
+       [ $(oc get pods | grep -v deploy | grep 'Terminating' | wc -l ) == $pod_count ]; then
 	convert::print_pass "All pods are down now. kompose down successful."
     fi
 }
