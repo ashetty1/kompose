@@ -48,4 +48,4 @@ fi
 
 sleep 10
 
-convert::kompose_down_check
+convert::kompose_down_check 2

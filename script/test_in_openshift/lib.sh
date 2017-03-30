@@ -156,7 +156,9 @@ function convert::kompose_up_check () {
 
 function convert::kompose_down_check () {
     retry_down=0
-    while [ $(oc get pods | wc -l ) != 0 ] ; do
+    local pod_count=$1
+    while [ $(oc get pods | wc -l ) != 0 ] ||
+	  [ $(oc get pods | grep -v deploy | grep 'Terminating' | wc -l ) != $pod_count ]; do
 	if [ $retry_down -lt 5 ]; then
 	    echo "Waiting for the pods to go down ..."
 	    oc get pods
@@ -172,7 +174,8 @@ function convert::kompose_down_check () {
     sleep 2;
 
     # Print a message if all the pods are down
-    if [ $(oc get pods | wc -l ) == 0 ] ; then
+    if [ $(oc get pods | wc -l ) == 0 ] ||
+       [ $(oc get pods | grep -v deploy | grep 'Terminating' | wc -l ) == $pod_count; then
 	convert::print_pass "All pods are down now. kompose down successful."
     fi
 }
