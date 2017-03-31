@@ -33,12 +33,8 @@ if [ $exit_status -ne 0 ]; then
     exit 1
 fi
 
-# Wait
-sleep 10
-
 # Check if the pods are up
 convert::kompose_up_check -p "etherpad mariadb"
-
 
 # Run Kompose down
 convert::print_msg "Running kompose down"
@@ -49,8 +45,6 @@ if [ $exit_status -ne 0 ]; then
     convert::print_fail "kompose down failed"
     exit 1
 fi
-
-sleep 10
 
 convert::kompose_down_check 2
 

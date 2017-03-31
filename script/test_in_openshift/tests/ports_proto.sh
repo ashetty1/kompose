@@ -29,9 +29,6 @@ if [ $exit_status -ne 0 ]; then
     exit 1
 fi
 
-# Wait
-sleep 10
-
 # convert::kompose_up_check -s "'6379/TCP,1234/UDP' '5000/TCP'"
 
 # Run Kompose down
@@ -43,9 +40,6 @@ if [ $exit_status -ne 0 ]; then
     convert::print_fail "Kompose down failed"
     exit 1
 fi
-
-sleep 10
-
 
 convert::kompose_down_check 2
 
