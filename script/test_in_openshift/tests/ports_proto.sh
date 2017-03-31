@@ -31,6 +31,8 @@ fi
 
 # convert::kompose_up_check -s "'6379/TCP,1234/UDP' '5000/TCP'"
 
+convert::kompose_up_check -p "web redis"
+
 # Run Kompose down
 convert::print_msg "Running kompose down"
 
