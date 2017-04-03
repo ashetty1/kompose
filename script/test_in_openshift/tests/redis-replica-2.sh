@@ -30,8 +30,6 @@ if [ $exit_status -ne 0 ]; then
     exit 1
 fi
 
-# Wait for some time ...
-sleep 60
 
 # Check if redis and web pods are up. Replica count: 2
 convert::kompose_up_check -p "redis web" -r 2
@@ -46,7 +44,4 @@ if [ $exit_status -ne 0 ]; then
     exit 1
 fi
 
-sleep 60
-
-convert::kompose_down_check
-
+convert::kompose_down_check 4

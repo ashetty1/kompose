@@ -33,9 +33,6 @@ if [ $exit_status -ne 0 ]; then
     exit 1
 fi
 
-# Wait
-sleep 60
-
 # Check if the pods are up
 convert::kompose_up_check -p "etherpad mariadb"
 
@@ -49,6 +46,4 @@ if [ $exit_status -ne 0 ]; then
     exit 1
 fi
 
-sleep 60
-
-convert::kompose_down_check
+convert::kompose_down_check 2
