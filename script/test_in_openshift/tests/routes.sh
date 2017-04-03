@@ -14,34 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Test case for checking replicas option with kompose
+# Test case for checking routes construct with kompose
 
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
-convert::print_msg "Running tests for replica option"
+docker_compose_file='${KOMPOSE_ROOT}/script/test/fixtures/expose-service/compose-files/docker-compose-expose-true.yml'
+
+convert::print_msg "Running tests for routes construct"
 
 # Run kompose up
-kompose --provider=openshift --emptyvols --replicas 2 -f ${KOMPOSE_ROOT}/examples/docker-compose.yml up; exit_status=$?
-
-if [ $exit_status -ne 0 ]; then
-    convert::print_fail "kompose up has failed"
-    exit 1
-fi
-
+convert::kompose_up $docker_compose_file
 
 # Check if redis and web pods are up. Replica count: 2
-convert::kompose_up_check -p "redis web" -r 2
+convert::oc_check_route "true"
 
 # Run Kompose down
 convert::print_msg "Running kompose down"
 
-kompose --provider=openshift --emptyvols --replicas 2 -f ${KOMPOSE_ROOT}/examples/docker-compose.yml down; exit_status=$?
-
-if [ $exit_status -ne 0 ]; then
-    convert::print_fail "Kompose down failed"
-    exit 1
-fi
-
-convert::kompose_down_check 4
+convert::kompose_down $docker_compose_file

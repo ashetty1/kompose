@@ -183,5 +183,39 @@ function convert::kompose_down_check () {
 }
 
 function convert::oc_cleanup () {
-    oc delete bc,rc,rs,svc,is,dc,deploy,ds,builds --all > /dev/null
+    oc delete bc,rc,rs,svc,is,dc,deploy,ds,builds,route --all > /dev/null
+}
+
+function convert::oc_check_route () {
+    local route_key=$1
+    if [ $route_key == 'true' ]; then
+	route_key='xip.io'
+    fi
+
+    if [ $(oc get route | grep ${route_key} | wc -l ) -gt 0 ]; then
+	convert::print_pass "Route *.${ route_key } has been exposed"
+    fi
+}
+
+function convert::kompose_up () {
+    local compose_file=$1
+    kompose --provider=openshift --emptyvols -f $compose_file up
+    exit_status=$?
+
+    if [ $exit_status -ne 0 ]; then
+	convert::print_fail "kompose up has failed"
+	exit 1
+    fi
+}
+
+
+function convert::kompose_down () {
+    local compose_file=$1
+    kompose --provider=openshift --emptyvols -f $compose_file down
+    exit_status=$?
+
+    if [ $exit_status -ne 0 ]; then
+	convert::print_fail "kompose down has failed"
+	exit 1
+    fi
 }
