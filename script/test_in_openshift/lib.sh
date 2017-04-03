@@ -193,8 +193,12 @@ function convert::oc_check_route () {
     fi
 
     if [ $(oc get route | grep ${route_key} | wc -l ) -gt 0 ]; then
-	convert::print_pass "Route *.${ route_key } has been exposed"
+	convert::print_pass "Route *.${route_key} has been exposed"
+    else
+	convert::print_fail "Route *.${route_key} has not been exposed"
     fi
+
+    oc get route
 }
 
 function convert::kompose_up () {
