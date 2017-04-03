@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Test case for kompose up/down with etherpad
+# Test case for buildconfig on kompose
 
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/script/test/cmd/lib.sh

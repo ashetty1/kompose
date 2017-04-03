@@ -31,6 +31,4 @@ convert::kompose_up $docker_compose_file
 convert::oc_check_route "true"
 
 # Run Kompose down
-convert::print_msg "Running kompose down"
-
 convert::kompose_down $docker_compose_file
