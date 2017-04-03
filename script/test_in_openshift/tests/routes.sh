@@ -20,7 +20,7 @@ KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
-docker_compose_file='${KOMPOSE_ROOT}/script/test/fixtures/expose-service/compose-files/docker-compose-expose-true.yml'
+docker_compose_file="${KOMPOSE_ROOT}/script/test/fixtures/expose-service/compose-files/docker-compose-expose-true.yml"
 
 convert::print_msg "Running tests for routes construct"
 

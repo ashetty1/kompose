@@ -26,10 +26,12 @@ install_oc_client
 
 convert::oc_cluster_up
 
-for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
-    $test_case
-    convert::oc_cleanup
-done
+# for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
+#     $test_case
+#     convert::oc_cleanup
+# done
+
+$KOMPOSE_ROOT/script/test_in_openshift/tests/routes.sh
 
 convert::oc_cluster_down
 
