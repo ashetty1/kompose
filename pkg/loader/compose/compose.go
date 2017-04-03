@@ -60,7 +60,6 @@ func checkUnsupportedKey(composeProject *project.Project) []string {
 		"DNSSearch":     false,
 		"DomainName":    false,
 		"EnvFile":       false,
-		"Extends":       false,
 		"ExternalLinks": false,
 		"ExtraHosts":    false,
 		"Hostname":      false,
@@ -77,7 +76,6 @@ func checkUnsupportedKey(composeProject *project.Project) []string {
 		"Uts":           false,
 		"ReadOnly":      false,
 		"Ulimits":       false,
-		"Dockerfile":    false,
 		"Net":           false,
 		"Sysctls":       false,
 		"Networks":      false, // there are special checks for Network in checkUnsupportedKey function
@@ -322,7 +320,7 @@ func (c *Compose) LoadFile(files []string) (kobject.KomposeObject, error) {
 		serviceConfig.ContainerName = composeServiceConfig.ContainerName
 		serviceConfig.Command = composeServiceConfig.Entrypoint
 		serviceConfig.Args = composeServiceConfig.Command
-		serviceConfig.Build = composeServiceConfig.Build.Context
+		serviceConfig.Dockerfile = composeServiceConfig.Build.Dockerfile
 
 		envs := loadEnvVars(composeServiceConfig.Environment)
 		serviceConfig.Environment = envs

@@ -33,13 +33,7 @@ Other examples are provided in the _examples_ [directory](./examples).
 
 ## Installation
 
-To install `kompose`, you can either `go get` or install the binary from a new release.
-
-#### Go
-
-```sh
-go get -u github.com/kubernetes-incubator/kompose
-```
+We have multiple ways to install Kompose. Our prefered method is downloading the binary from the latest GitHub release.
 
 #### GitHub release
 
@@ -47,18 +41,26 @@ Kompose is released via GitHub on a three-week cycle, you can see all current re
 
 ```sh
 # Linux 
-curl -L https://github.com/kubernetes-incubator/kompose/releases/download/v0.3.0/kompose-linux-amd64 -o kompose
+curl -L https://github.com/kubernetes-incubator/kompose/releases/download/v0.4.0/kompose-linux-amd64 -o kompose
 
 # macOS
-curl -L https://github.com/kubernetes-incubator/kompose/releases/download/v0.3.0/kompose-darwin-amd64 -o kompose
+curl -L https://github.com/kubernetes-incubator/kompose/releases/download/v0.4.0/kompose-darwin-amd64 -o kompose
 
 # Windows
-curl -L https://github.com/kubernetes-incubator/kompose/releases/download/v0.3.0/kompose-windows-amd64.exe -o kompose.exe
-```
+curl -L https://github.com/kubernetes-incubator/kompose/releases/download/v0.4.0/kompose-windows-amd64.exe -o kompose.exe
 
-```sh
 chmod +x kompose
 sudo mv ./kompose /usr/local/bin/kompose
+```
+
+Alternatively, you can download the [tarball](https://github.com/kubernetes-incubator/kompose/releases].
+
+#### Go
+
+Installing using `go get` pulls from the master branch with the latest development changes.
+
+```sh
+go get -u github.com/kubernetes-incubator/kompose
 ```
 
 #### CentOS
