@@ -21,25 +21,15 @@ source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
 convert::print_msg "Testing buildconfig on kompose"
 
-# Run kompose up
-kompose --emptyvols --provider=openshift -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml up; exit_status=$?
+docker_compose_file="${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml"
 
-if [ $exit_status -ne 0 ]; then
-   convert::print_fail "kompose up fails"
-   exit 1
-fi
+# Run kompose up
+convert::kompose_up $docker_compose_file
 
 # Check if the pods are up.
 convert::kompose_up_check -p foo
 
 # Run Kompose down
-convert::print_msg "Running kompose down"
-
-kompose --provider=openshift --emptyvols -f ${KOMPOSE_ROOT}/examples/buildconfig/docker-compose.yml down; exit_status=$?
-
-if [ $exit_status -ne 0 ]; then
-    convert::print_fail "kompose down failed"
-    exit 1
-fi
+convert::kompose_down $docker_compose_file
 
 convert::kompose_down_check 2

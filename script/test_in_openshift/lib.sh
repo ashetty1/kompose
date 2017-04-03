@@ -198,11 +198,13 @@ function convert::oc_check_route () {
 	convert::print_fail "Route *.${route_key} has not been exposed"
     fi
 
+    echo ""
     oc get route
 }
 
 function convert::kompose_up () {
     local compose_file=$1
+    convert::print_msg "Running kompose up ..."
     kompose --provider=openshift --emptyvols -f $compose_file up
     exit_status=$?
 
@@ -215,6 +217,7 @@ function convert::kompose_up () {
 
 function convert::kompose_down () {
     local compose_file=$1
+    convert::print_msg "Running kompose down ..."
     kompose --provider=openshift --emptyvols -f $compose_file down
     exit_status=$?
 
