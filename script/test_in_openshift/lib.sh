@@ -25,6 +25,8 @@ function convert::print_msg () {
 }
 
 function install_oc_client () {
+    # Valid only for Travis
+    convert::print_msg "Installing oc client binary ..."
     sudo sed -i 's:DOCKER_OPTS=":DOCKER_OPTS="--insecure-registry 172.30.0.0/16 :g' /etc/default/docker
     sudo mv /bin/findmnt /bin/findmnt.backup
     sudo cat /etc/default/docker
@@ -82,7 +84,7 @@ function convert::kompose_down () {
 
     if [ $exit_status -ne 0 ]; then
 	FAIL_MSGS=$FAIL_MSGS"kompose down failed with exit status: $exit_status\n";
-	exit $exit_status
+	exit $exit_status;
     fi
 }
 
@@ -130,10 +132,10 @@ function convert::kompose_up_check () {
 	      [ $(oc get pods | eval ${query_2} | awk '{ print $3 }' | \
 			 grep ${query_2_status} | wc -l) -ne $replica_2 ]; do
 
-	if [ $retry_up -lt 5 ]; then
+	if [ $retry_up -lt 10 ]; then
 	    echo "Waiting for the pods to come up ..."
 	    retry_up=$(($retry_up + 1))
-	    sleep 30
+	    sleep 10
 	else
 	    convert::print_fail "kompose up has failed to bring the pods up"
 	    exit 1
@@ -142,7 +144,7 @@ function convert::kompose_up_check () {
     done
 
     # Wait
-    sleep 5
+    sleep 2
 
     # If pods are up, print a success message
     if [ $(oc get pods | eval ${query_1} | awk '{ print $3 }' | \
@@ -155,13 +157,15 @@ function convert::kompose_up_check () {
 }
 
 function convert::kompose_down_check () {
-    retry_down=0
-    while [ $(oc get pods | wc -l ) != 0 ] ; do
-	if [ $retry_down -lt 5 ]; then
+    local retry_down=0
+    local pod_count=$1
+    while [ $(oc get pods | wc -l ) != 0 ] &&
+	  [ $(oc get pods | grep -v deploy | grep 'Terminating' | wc -l ) != $pod_count ]; do
+	if [ $retry_down -lt 10 ]; then
 	    echo "Waiting for the pods to go down ..."
 	    oc get pods
 	    retry_down=$(($retry_down + 1))
-	    sleep 30
+	    sleep 10
 	else
 	    convert::print_fail "kompose down has failed"
 	    exit 1
@@ -169,15 +173,57 @@ function convert::kompose_down_check () {
     done
 
     # Wait
-    sleep 5;
+    sleep 2
 
     # Print a message if all the pods are down
-    if [ $(oc get pods | wc -l ) == 0 ] ; then
+    if [ $(oc get pods | wc -l ) == 0 ] ||
+       [ $(oc get pods | grep -v deploy | grep 'Terminating' | wc -l ) == $pod_count ]; then
 	convert::print_pass "All pods are down now. kompose down successful."
+	oc get pods
     fi
 }
 
 function convert::oc_cleanup () {
-    oc delete bc,rc,rs,svc,is,dc,deploy,ds,builds --all > /dev/null
+    oc delete bc,rc,rs,svc,is,dc,deploy,ds,builds,route --all > /dev/null
 }
 
+function convert::oc_check_route () {
+    local route_key=$1
+    if [ $route_key == 'true' ]; then
+	route_key='xip.io'
+    fi
+
+    if [ $(oc get route | grep ${route_key} | wc -l ) -gt 0 ]; then
+	convert::print_pass "Route *.${route_key} has been exposed"
+    else
+	convert::print_fail "Route *.${route_key} has not been exposed"
+    fi
+
+    echo ""
+    oc get route
+}
+
+function convert::kompose_up () {
+    local compose_file=$1
+    convert::print_msg "Running kompose up ..."
+    kompose --provider=openshift --emptyvols -f $compose_file up
+    exit_status=$?
+
+    if [ $exit_status -ne 0 ]; then
+	convert::print_fail "kompose up has failed"
+	exit 1
+    fi
+}
+
+
+function convert::kompose_down () {
+    local compose_file=$1
+    convert::print_msg "Running kompose down ..."
+    kompose --provider=openshift --emptyvols -f $compose_file down
+    exit_status=$?
+
+    if [ $exit_status -ne 0 ]; then
+	convert::print_fail "kompose down has failed"
+	exit 1
+    fi
+}

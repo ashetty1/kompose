@@ -14,20 +14,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Master script for running kompose testcases on OpenShift
+# Test case for kompose up/down with etherpad
 
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/kompose/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
-
 convert::start_test "Functional tests on OpenShift"
-install_oc_client
+
+if [ $TRAVIS == 'true' ]; then
+    install_oc_client
+fi
+
+if [ -z $(whereis oc | awk '{ print $2 }') ]; then
+    convert::print_fail "Please install the oc binary to run tests"
+    exit 1
+fi
 
 convert::oc_cluster_up
+
 for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
     $test_case
-    sleep 5
     convert::oc_cleanup
 done
+
 convert::oc_cluster_down
+

@@ -21,29 +21,15 @@ source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
 convert::print_msg "Running tests with entrypoint/command option"
 
+docker_compose_file="${KOMPOSE_ROOT}/script/test_in_openshift/compose-files/docker-compose-command.yml"
+
 # Run kompose up
-kompose --provider=openshift --emptyvols -f ${KOMPOSE_ROOT}/script/test_in_openshift/compose-files/docker-compose-command.yml up; exit_status=$?
-
-if [ $exit_status -ne 0 ]; then
-    convert::print_fail "kompose up has failed"
-    exit 1
-fi
-
-# Wait
-sleep 60
+convert::kompose_up $docker_compose_file
 
 convert::kompose_up_check -p 'base1 base2'
 
 # Run Kompose down
-convert::print_msg "Running kompose down"
+convert::kompose_down $docker_compose_file
 
-kompose --provider=openshift --emptyvols -f ${KOMPOSE_ROOT}/script/test_in_openshift/compose-files/docker-compose-command.yml down; exit_status=$?
+convert::kompose_down_check 2
 
-if [ $exit_status -ne 0 ]; then
-    convert::print_fail "Kompose down failed"
-    exit 1
-fi
-
-sleep 60
-
-convert::kompose_down_check
