@@ -132,10 +132,10 @@ function convert::kompose_up_check () {
 	      [ $(oc get pods | eval ${query_2} | awk '{ print $3 }' | \
 			 grep ${query_2_status} | wc -l) -ne $replica_2 ]; do
 
-	if [ $retry_up -lt 10 ]; then
+	if [ $retry_up -lt 120 ]; then
 	    echo "Waiting for the pods to come up ..."
 	    retry_up=$(($retry_up + 1))
-	    sleep 10
+	    sleep 1
 	else
 	    convert::print_fail "kompose up has failed to bring the pods up"
 	    exit 1
@@ -161,11 +161,11 @@ function convert::kompose_down_check () {
     local pod_count=$1
     while [ $(oc get pods | wc -l ) != 0 ] &&
 	  [ $(oc get pods | grep -v deploy | grep 'Terminating' | wc -l ) != $pod_count ]; do
-	if [ $retry_down -lt 10 ]; then
+	if [ $retry_down -lt 120 ]; then
 	    echo "Waiting for the pods to go down ..."
 	    oc get pods
 	    retry_down=$(($retry_down + 1))
-	    sleep 10
+	    sleep 1
 	else
 	    convert::print_fail "kompose down has failed"
 	    exit 1

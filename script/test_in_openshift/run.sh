@@ -26,9 +26,9 @@ if [[ -n "${TRAVIS}" ]]; then
     install_oc_client
 fi
 
-oc version > /dev/null; exit_status=$?
-if [ $exit_status -ne 0 ]; then
+if [ -z $(whereis oc | awk '{ print $2 }') ]; then
     convert::print_fail "Please install the oc binary to run tests"
+    echo ""
     exit 1
 fi
 
