@@ -28,6 +28,8 @@ convert::start_test "Functional tests on OpenShift"
 #     install_oc_client
 # fi
 
+whereis oc
+
 if [ $(whereis oc | wc -l) -eq 0 ]; then
     convert::print_fail "Please install oc binary to run the tests"
     exit 1
