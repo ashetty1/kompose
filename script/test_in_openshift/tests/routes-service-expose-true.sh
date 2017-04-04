@@ -14,30 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Test case for kompose up/down with etherpad
+# Test case for checking routes construct with kompose
 
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
-source $KOMPOSE_ROOT/kompose/script/test/cmd/lib.sh
+source $KOMPOSE_ROOT/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
-convert::start_test "Functional tests on OpenShift"
+docker_compose_file="${KOMPOSE_ROOT}/script/test/fixtures/expose-service/compose-files/docker-compose-expose-true.yml"
 
-if [[ -n "${TRAVIS}" ]]; then
-    install_oc_client
-fi
+convert::print_msg "Running tests for routes construct"
 
-oc version > /dev/null; exit_status=$?
-if [ $exit_status -ne 0 ]; then
-    convert::print_fail "Please install the oc binary to run tests"
-    exit 1
-fi
+# Run kompose up
+convert::kompose_up $docker_compose_file
 
-convert::oc_cluster_up
+# Check if the service has been exposed
+convert::oc_check_route "true"
 
-for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
-    $test_case
-    convert::oc_cleanup
-done
-
-convert::oc_cluster_down
+# Run Kompose down
+convert::kompose_down $docker_compose_file
 
