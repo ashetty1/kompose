@@ -22,12 +22,12 @@ source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
 
 convert::start_test "Functional tests on OpenShift"
 
-# if [ $TRAVIS == 'true' ]; then
-#     install_oc_client
-# fi
+if [ $TRAVIS == 'true' ]; then
+    install_oc_client
+fi
 
 if [ -z $(whereis oc | awk '{ print $2 }') ]; then
-    convert::print_fail "Please install oc binary to run the tests"
+    convert::print_fail "Please install the oc binary to run tests"
     exit 1
 fi
 
