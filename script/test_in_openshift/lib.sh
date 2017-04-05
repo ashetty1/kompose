@@ -133,6 +133,7 @@ function convert::kompose_up_check () {
 
 	if [ $retry_up -lt 120 ]; then
 	    echo "Waiting for the pods to come up ..."
+	    oc get pods
 	    retry_up=$(($retry_up + 1))
 	    sleep 1
 	else
