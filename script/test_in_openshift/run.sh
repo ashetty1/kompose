@@ -26,9 +26,8 @@ if [[ -n "${TRAVIS}" ]]; then
     install_oc_client
 fi
 
-oc version > /dev/null; exit_status=$?
-if [ $exit_status -ne 0 ]; then
-    convert::print_fail "Please install the oc binary to run tests"
+if [ -z $(whereis oc | awk '{ print $2 }') ]; then
+    convert::print_fail "Please install the oc binary to run tests\n"
     exit 1
 fi
 
@@ -40,4 +39,3 @@ for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
 done
 
 convert::oc_cluster_down
-
