@@ -39,8 +39,7 @@ function install_oc_client () {
 
 function convert::oc_cluster_up () {
 
-    convert::run_cmd "oc cluster up"
-    exit_status=$?
+    oc cluster up; exit_status=$?
 
     if [ $exit_status -ne 0 ]; then
 	FAIL_MSGS=$FAIL_MSGS"exit status: $exit_status\n";
@@ -124,19 +123,21 @@ function convert::kompose_up_check () {
 	query_2_status='Completed'
 	replica_2=1 
     fi
+
+    convert::print_msg "Waiting for the pods to come up ..."
     
     # FIXME: Make this generic to cover all cases
     while [ $(oc get pods | eval ${query_1} | awk '{ print $3 }' | \
 		     grep ${query_1_status} | wc -l) -ne $replica_1 ] ||
 	      [ $(oc get pods | eval ${query_2} | awk '{ print $3 }' | \
 			 grep ${query_2_status} | wc -l) -ne $replica_2 ]; do
-
+	
 	if [ $retry_up -lt 120 ]; then
-	    echo "Waiting for the pods to come up ..."
 	    retry_up=$(($retry_up + 1))
 	    sleep 1
 	else
 	    convert::print_fail "kompose up has failed to bring the pods up\n"
+	    oc get pods
 	    exit 1
 	fi
 	
@@ -158,15 +159,17 @@ function convert::kompose_up_check () {
 function convert::kompose_down_check () {
     local retry_down=0
     local pod_count=$1
+
+    convert::print_msg "Waiting for the pods to go down ..."
+	  
     while [ $(oc get pods | wc -l ) != 0 ] &&
 	  [ $(oc get pods | grep -v deploy | grep 'Terminating' | wc -l ) != $pod_count ]; do
 	if [ $retry_down -lt 120 ]; then
-	    echo "Waiting for the pods to go down ..."
-	    oc get pods
 	    retry_down=$(($retry_down + 1))
 	    sleep 1
 	else
 	    convert::print_fail "kompose down has failed\n"
+	    oc get pods
 	    exit 1
 	fi
     done
@@ -177,7 +180,7 @@ function convert::kompose_down_check () {
     # Print a message if all the pods are down
     if [ $(oc get pods | wc -l ) == 0 ] ||
        [ $(oc get pods | grep -v deploy | grep 'Terminating' | wc -l ) == $pod_count ]; then
-	convert::print_pass "All pods are down now. kompose down successful."
+	convert::print_pass "All pods are down now. kompose down successful.\n"
 	oc get pods
     fi
 }
