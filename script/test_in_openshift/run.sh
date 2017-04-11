@@ -19,7 +19,8 @@
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 source $KOMPOSE_ROOT/kompose/script/test/cmd/lib.sh
 source $KOMPOSE_ROOT/script/test_in_openshift/lib.sh
-openshift_exit=0
+openshift_exit_status=0
+
 convert::start_test "Functional tests on OpenShift"
 
 if [[ -n "${TRAVIS}" ]]; then
@@ -36,10 +37,11 @@ convert::oc_cluster_up
 for test_case in $KOMPOSE_ROOT/script/test_in_openshift/tests/*; do
     $test_case; exit_status=$?
     if [ $exit_status -ne 0 ]; then
-	openshift_exit=1
+	openshift_exit_status=1
     fi
     convert::oc_cleanup
 done
 
 convert::oc_cluster_down
-exit $openshift_exit
+
+exit $openshift_exit_status
