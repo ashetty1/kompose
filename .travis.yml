@@ -26,7 +26,8 @@ install:
   - true
 
 script:
-  - make test
+  - make install
+  - make test-openshift
 
 after_success:
   # gover collects all .coverprofile files and saves it to one file gover.coverprofile
