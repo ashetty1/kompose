@@ -1,4 +1,3 @@
-@Library('github.com/rupalibehera/fabric8-pipeline-library@kompose-pr-build')
 def dummy
  goTemplate{
   dockerNode{
