@@ -9,10 +9,10 @@ go_import_path: github.com/kubernetes-incubator/kompose
 
 matrix:
   include:
-    - go: 1.6
-      # Only build docs once
-      env: BUILD_DOCS=yes
-    - go: 1.7
+    # - go: 1.6
+    #   # Only build docs once
+    #   env: BUILD_DOCS=yes
+    # - go: 1.7
     - go: 1.8
 
 install:
@@ -21,11 +21,12 @@ install:
   - script/test/cmd/fix_detached_head.sh
 
 script:
-  - make test
+  - make install
+  - make test-openshift
 
-after_success:
-  # gover collects all .coverprofile files and saves it to one file gover.coverprofile
-  - gover
-  - goveralls -coverprofile=gover.coverprofile -service=travis-ci
-  # sync the docs only if everything else was successful
-  - ./script/sync-docs.sh
+# after_success:
+#   # gover collects all .coverprofile files and saves it to one file gover.coverprofile
+#   - gover
+#   - goveralls -coverprofile=gover.coverprofile -service=travis-ci
+#   # sync the docs only if everything else was successful
+#   - ./script/sync-docs.sh
