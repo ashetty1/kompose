@@ -14,6 +14,8 @@
 # See the License for the specific language governing pe#rmissions and
 # limitations under the License.
 
+# This script generates unit tests for Kompose
+# Usage: ./script/test/cmd/make-test.sh
 
 KOMPOSE_ROOT=$(readlink -f $(dirname "${BASH_SOURCE}")/../../..)
 
